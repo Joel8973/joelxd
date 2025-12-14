@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Alert</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .container {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #f00;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #f00;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #f00;
+            animation: blink 1s infinite;
+        }
+        
+        .warning {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 2px solid #f00;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        .warning h2 {
+            color: #ff0;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .message {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .terminal {
+            background-color: rgba(0, 20, 0, 0.8);
+            border: 1px solid #0f0;
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+        }
+        
+        .terminal-line {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .prompt {
+            color: #0f0;
+            margin-right: 10px;
+        }
+        
+        .cmd {
+            color: #0ff;
+            animation: typing 3s steps(40, end);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .cmd-output {
+            color: #ff0;
+            margin-left: 20px;
+        }
+        
+        .countdown {
+            text-align: center;
+            font-size: 2rem;
+            color: #f00;
+            margin-bottom: 30px;
+            animation: blink 0.5s infinite;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #444;
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+        }
+        
+        .hacker-img {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            opacity: 0.7;
+            z-index: 3;
+            filter: sepia(1) hue-rotate(90deg);
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        .glitch {
+            position: relative;
+            animation: glitch 5s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .reveal-button {
+            background-color: #f00;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .reveal-button:hover {
+            background-color: #ff0;
+            color: #000;
+            transform: scale(1.05);
+        }
+        
+        .hidden-message {
+            display: none;
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            padding: 30px;
+            margin-top: 30px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .hidden-message h3 {
+            color: #0f0;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .hidden-message p {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fondo estilo Matrix -->
+    <canvas id="matrix" class="matrix-bg"></canvas>
+    
+    <!-- Imagen de hacker -->
+    <img src="https://cdn.pixabay.com/photo/2017/01/29/21/22/hacker-2019888_960_720.png" alt="Hacker" class="hacker-img">
+    
+    <div class="container">
+        <div class="header glitch">
+            <h1>⚠ SISTEMA COMPROMETIDO ⚠</h1>
+        </div>
+        
+        <div class="warning">
+            <h2>ALERTA DE SEGURIDAD: INTRUSIÓN DETECTADA</h2>
+            <p>Se ha detectado acceso no autorizado a su sistema. Todos sus archivos están siendo copiados.</p>
+        </div>
+        
+        <div class="message">
+            <p><strong>ATENCIÓN:</strong> Su dispositivo ha sido comprometido. Hemos obtenido acceso completo a su sistema.</p>
+            <p>Datos detectados: Información personal, contraseñas, historial de navegación, fotos, documentos.</p>
+            <p>Dirección IP rastreada: 192.168.1.<span id="ip-part">105</span></p>
+            <p>Ubicación estimada: <span id="location">Cerca de su ubicación actual</span></p>
+        </div>
+        
+        <div class="terminal">
+            <div class="terminal-line">
+                <div class="prompt">root@hacker:~#</div>
+                <div class="cmd">scan_system --target=usuario --full-access</div>
+            </div>
+            <div class="cmd-output">[+] Sistema vulnerable detectado</div>
+            
+            <div class="terminal-line">
+                <div class="prompt">root@hacker:~#</div>
+                <div class="cmd">extract_data --passwords --photos --documents</div>
+            </div>
+            <div class="cmd-output">[+] Extrayendo 247 archivos...</div>
+            
+            <div class="terminal-line">
+                <div class="prompt">root@hacker:~#</div>
+                <div class="cmd">bypass_firewall --stealth-mode</div>
+            </div>
+            <div class="cmd-output">[+] Firewall desactivado. Acceso completo obtenido.</div>
+            
+            <div class="terminal-line">
+                <div class="prompt">root@hacker:~#</div>
+                <div class="cmd">install_backdoor --persistent</div>
+            </div>
+            <div class="cmd-output">[+] Puerta trasera instalada. Acceso permanente garantizado.</div>
+            
+            <div class="terminal-line">
+                <div class="prompt">root@hacker:~#</div>
+                <div class="cmd">encrypt_files --ransomware --bitcoin-demand</div>
+            </div>
+            <div class="cmd-output">[+] 3.2 GB de datos encriptados. Solicitud de rescate enviada.</div>
+        </div>
+        
+        <div class="countdown" id="countdown">
+            AUTODESTRUCCIÓN EN: <span id="timer">00:30</span>
+        </div>
+        
+        <div class="button-container">
+            <button class="reveal-button" onclick="revealPrank()">DETENER HACKEO</button>
+        </div>
+        
+        <div id="hiddenMessage" class="hidden-message">
+            <h3>¡ES UNA BROMA!</h3>
+            <p>Tu dispositivo no ha sido hackeado.</p>
+            <p>Esta es solo una página HTML/CSS/JS inofensiva.</p>
+            <p>Recuerda siempre mantener buenas prácticas de seguridad:</p>
+            <p>• Usa contraseñas fuertes y únicas<br>
+               • Mantén tu software actualizado<br>
+               • No hagas clic en enlaces sospechosos<br>
+               • Usa autenticación de dos factores</p>
+            <p>¡No te asustes! 😄</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 Sistema de Seguridad - Esta es una simulación de hackeo con fines educativos</p>
+        </div>
+    </div>
+    
+    <script>
+        // Configuración del fondo Matrix
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$+-*/=%"#&_()!?;:[]{}';
+        const lettersArray = letters.split('');
+        
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for(let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        // Temporizador de cuenta regresiva
+        let seconds = 30;
+        const timerElement = document.getElementById('timer');
+        const countdownElement = document.getElementById('countdown');
+        
+        function updateTimer() {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (seconds <= 10) {
+                countdownElement.style.animation = 'blink 0.2s infinite';
+            }
+            
+            if (seconds <= 0) {
+                clearInterval(timerInterval);
+                timerElement.textContent = "00:00";
+                countdownElement.textContent = "¡SISTEMA COMPROMETIDO!";
+                // No revelamos automáticamente, dejamos que el usuario pulse el botón
+            }
+            
+            seconds--;
+        }
+        
+        const timerInterval = setInterval(updateTimer, 1000);
+        
+        // Efectos de sonido (simulados con oscilador de audio)
+        function playBeepSound(frequency, duration) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch(e) {
+                console.log("Audio no disponible");
+            }
+        }
+        
+        // Efectos de sonido aleatorios
+        setInterval(() => {
+            if (seconds > 0) {
+                playBeepSound(800 + Math.random() * 400, 0.1);
+            }
+        }, 1000);
+        
+        // Cambiar partes de la IP aleatoriamente
+        setInterval(() => {
+            document.getElementById('ip-part').textContent = Math.floor(Math.random() * 255);
+        }, 2000);
+        
+        // Actualizar ubicación aleatoria
+        const locations = [
+            "Cerca de su ubicación actual",
+            "España, Madrid",
+            "México, Ciudad de México",
+            "Argentina, Buenos Aires",
+            "Colombia, Bogotá",
+            "Estados Unidos, California",
+            "Rusia, Moscú",
+            "China, Beijing"
+        ];
+        
+        setInterval(() => {
+            const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+            document.getElementById('location').textContent = randomLocation;
+        }, 3000);
+        
+        // Revelar que es una broma
+        function revealPrank() {
+            clearInterval(timerInterval);
+            
+            // Parar efectos de sonido
+            const matrixInterval = setInterval(drawMatrix, 50);
+            setTimeout(() => clearInterval(matrixInterval), 1000);
+            
+            // Mostrar mensaje de broma
+            document.getElementById('hiddenMessage').style.display = 'block';
+            
+            // Cambiar apariencia de la página
+            document.body.style.backgroundColor = '#111';
+            document.querySelector('.header h1').textContent = "¡ES UNA BROMA!";
+            document.querySelector('.header h1').style.color = "#0f0";
+            document.querySelector('.header h1').style.textShadow = "0 0 10px #0f0";
+            document.querySelector('.header').classList.remove('glitch');
+            
+            document.querySelector('.warning').style.display = 'none';
+            document.querySelector('.countdown').style.display = 'none';
+            document.querySelector('.reveal-button').style.display = 'none';
+            
+            // Reproducir sonido de alivio
+            playBeepSound(523.25, 0.5); // Do
+            setTimeout(() => playBeepSound(659.25, 0.5), 300); // Mi
+            setTimeout(() => playBeepSound(783.99, 0.8), 600); // Sol
+        }
+        
+        // Iniciar animación Matrix
+        const matrixInterval = setInterval(drawMatrix, 50);
+        
+        // Ajustar canvas al cambiar tamaño de ventana
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Efecto de escritura en terminal
+        const cmdElements = document.querySelectorAll('.cmd');
+        cmdElements.forEach((element, index) => {
+            const text = element.textContent;
+            element.textContent = '';
+            element.style.width = '0';
+            
+            setTimeout(() => {
+                element.style.animation = `typing ${text.length/10}s steps(${text.length}, end)`;
+                element.textContent = text;
+                element.style.width = 'auto';
+            }, index * 3000);
+        });
+    </script>
+</body>
+</html>
